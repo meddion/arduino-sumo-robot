@@ -7,12 +7,14 @@ int distanceLeft, distanceRight;
 struct {
   short pinName;
   short value;
-} distSensor1, distSensor2, laserSensor1, laserSensor2;
+} 
+distSensor1, distSensor2, laserSensor1, laserSensor2;
 
 struct {
   short pinDirection;
   short pinSpeed;
-} leftMotor, rightMotor;
+} 
+leftMotor, rightMotor;
 
 void setup()
 {
@@ -154,54 +156,53 @@ void loop()
   distSensor1.value = analogRead(distSensor1.pinName);
   distSensor2.value = analogRead(distSensor2.pinName);
 
-  Serial.print("Left laser: ");
-  Serial.println(laserSensor1.value);
-  Serial.print("Right laser: ");
-  Serial.println(laserSensor2.value);
+  testLaserSensors();
+  
   /*do
-  {
-    lookForward();
-    lookBackward();
-  }
-  while (distSensor1.value > 850 && distSensor2.value > 850 && makeMoveDecision());
-
-  if (makeMoveDecision() == 0) {
-    moveBack();
-    moveRight(2);
-  }
-
-  if (makeMoveDecision() == 2) {
-    moveBack();
-    moveRight();
-    moveStraight();
-  }
-
-  if (makeMoveDecision() == 3) {
-    moveBack();
-    moveLeft();
-    moveStraight();
-  }
-
-  if (distSensor1.value <= 850 && distSensor2.value > 850) {
-    moveHalfLeft();
-  } else if (distSensor1.value > 850 && distSensor2.value <= 850) {
-    moveHalfRight();
-  }
-
-  while (distSensor1.value <= 850 && distSensor2.value <= 850)
-  {
-    do
-    {
-      moveStraight();
-    }
-    while (distSensor1.value == distSensor2.value);
-
-    if (distSensor1.value < distSensor2.value) {
-      moveLeft();
-    }
-
-    if (distSensor1.value > distSensor2.value) {
-      moveRight();
-    }
-  }*/
+   {
+   lookForward();
+   lookBackward();
+   }
+   while (distSensor1.value > 850 && distSensor2.value > 850 && makeMoveDecision());
+   
+   if (makeMoveDecision() == 0) {
+   moveBack();
+   moveRight(2);
+   }
+   
+   if (makeMoveDecision() == 2) {
+   moveBack();
+   moveRight();
+   moveStraight();
+   }
+   
+   if (makeMoveDecision() == 3) {
+   moveBack();
+   moveLeft();
+   moveStraight();
+   }
+   
+   if (distSensor1.value <= 850 && distSensor2.value > 850) {
+   moveHalfLeft();
+   } else if (distSensor1.value > 850 && distSensor2.value <= 850) {
+   moveHalfRight();
+   }
+   
+   while (distSensor1.value <= 850 && distSensor2.value <= 850)
+   {
+   do
+   {
+   moveStraight();
+   }
+   while (distSensor1.value == distSensor2.value);
+   
+   if (distSensor1.value < distSensor2.value) {
+   moveLeft();
+   }
+   
+   if (distSensor1.value > distSensor2.value) {
+   moveRight();
+   }
+   }*/
 }
+
