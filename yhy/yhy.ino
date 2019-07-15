@@ -2,6 +2,7 @@ const int BIT_RATE = 9600;
 const int DEFAULT_SPEED = 50;
 const int OBSERVABLE_BOTTOM_BOUNDARY = 400;
 const int OBSERVABLE_TOP_BOUNDARY = 900;
+const int TESTING_DELAY = 500;
 
 enum Desicion {BOTH_DIM, BOTH_BRIGHT, FIRST_DIM, SECOND_DIM};
 
@@ -45,7 +46,7 @@ void moveStraight(int times = 1)
     digitalWrite(leftMotor.pinDirection, HIGH);
     analogWrite(rightMotor.pinSpeed, DEFAULT_SPEED);
     digitalWrite(rightMotor.pinDirection, HIGH);
-    delay(1500);
+    delay(TESTING_DELAY);
   }
 }
 
@@ -56,7 +57,7 @@ void moveBack(int times = 1)
     digitalWrite(leftMotor.pinDirection, LOW);
     analogWrite(rightMotor.pinSpeed, DEFAULT_SPEED);
     digitalWrite(rightMotor.pinDirection, LOW);
-    delay(1500);
+    delay(TESTING_DELAY);
   }
 }
 
@@ -67,7 +68,7 @@ void moveLeft(int times = 1)
     digitalWrite(leftMotor.pinDirection, LOW);
     analogWrite(rightMotor.pinSpeed, DEFAULT_SPEED);
     digitalWrite(rightMotor.pinDirection, HIGH);
-    delay(1500);
+    delay(TESTING_DELAY);
   }
 }
 
@@ -78,7 +79,7 @@ void moveRight(int times = 1)
     digitalWrite(leftMotor.pinDirection, HIGH);
     analogWrite(rightMotor.pinSpeed, DEFAULT_SPEED);
     digitalWrite(rightMotor.pinDirection, LOW);
-    delay(1500);
+    delay(TESTING_DELAY);
   }
 }
 
@@ -87,7 +88,7 @@ void moveHalfLeft(int times = 1)
   for (int i = 0; i < times; i++) {
     analogWrite(rightMotor.pinSpeed, DEFAULT_SPEED);
     digitalWrite(rightMotor.pinDirection, HIGH);
-    delay(1500);
+    delay(TESTING_DELAY);
   }
 }
 
@@ -96,8 +97,29 @@ void moveHalfRight(int times = 1)
   for (int i = 0; i < times; i++) {
     analogWrite(leftMotor.pinSpeed, DEFAULT_SPEED);
     digitalWrite(leftMotor.pinDirection, HIGH);
-    delay(1500);
+    delay(TESTING_DELAY);
   }
+}
+
+void lookForward()
+{
+  moveStraight();
+  moveLeft();
+  moveStraight();
+  moveRight(2);
+  moveStraight();
+  moveLeft();
+}
+
+void lookBackward()
+{
+  moveRight(2);
+  moveStraight();
+  moveLeft();
+  moveStraight();
+  moveRight(2);
+  moveStraight();
+  moveLeft();
 }
 
 bool doesLeftDistSensorSee() {
@@ -108,7 +130,9 @@ bool doesRightDistSensorSee() {
   return rightLaserSensor.value >= OBSERVABLE_BOTTOM_BOUNDARY && rightLaserSensor.value < OBSERVABLE_TOP_BOUNDARY;
 }
 
-/*void testDistSensors()
+/* Test functions
+ * 
+ * void testDistSensors()
 {
   Serial.print("Left distance: ");
   Serial.println(leftDistSensor.value);
@@ -133,27 +157,6 @@ int compareLasersInput()
   return BOTH_DIM; // if both laser sensors output 0
 }
 
-void lookForward()
-{
-  moveStraight();
-  moveLeft();
-  moveStraight();
-  moveRight(2);
-  moveStraight();
-  moveLeft();
-}
-
-void lookBackward()
-{
-  moveRight(2);
-  moveStraight();
-  moveLeft();
-  moveStraight();
-  moveRight(2);
-  moveStraight();
-  moveLeft();
-}
-
 void loop()
 {
   leftLaserSensor.value = digitalRead(leftLaserSensor.pinName);
@@ -161,12 +164,10 @@ void loop()
   leftDistSensor.value = analogRead(leftDistSensor.pinName);
   rightDistSensor.value = analogRead(rightDistSensor.pinName);
 
-  do
-  {
+  do {
     lookForward();
     lookBackward();
-  }
-  while (!doesLeftDistSensorSee() && !doesRightDistSensorSee() && compareLasersInput() == BOTH_BRIGHT);
+  } while (!doesLeftDistSensorSee() && !doesRightDistSensorSee() && compareLasersInput() == BOTH_BRIGHT);
 
  if (compareLasersInput() == FIRST_DIM) {
     moveBack();
@@ -177,24 +178,17 @@ void loop()
     moveLeft();
     moveStraight();
   }
-  // turning left or right
+  
   if (doesLeftDistSensorSee() && !doesRightDistSensorSee()) {
     moveHalfLeft();
   } else if (doesLeftDistSensorSee() && !doesRightDistSensorSee()) {
     moveHalfRight();
   }
 
-  while (doesLeftDistSensorSee() && doesRightDistSensorSee())
-  {
-    do
-    {
-      moveStraight();
-    }
-    while (leftDistSensor.value == rightDistSensor.value);
+  while (doesLeftDistSensorSee() && doesRightDistSensorSee()) {
+    do moveStraight(); while (leftDistSensor.value == rightDistSensor.value);
 
-    if (leftDistSensor.value < rightDistSensor.value)
-      moveLeft();
-    else if (leftDistSensor.value > rightDistSensor.value)
-      moveRight();
+    if (leftDistSensor.value < rightDistSensor.value) moveLeft();
+    else if (leftDistSensor.value > rightDistSensor.value) moveRight();
   }
 }
