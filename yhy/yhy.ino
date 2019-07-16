@@ -47,6 +47,7 @@ void moveStraight(int times = 1)
     analogWrite(rightMotor.pinSpeed, DEFAULT_SPEED);
     digitalWrite(rightMotor.pinDirection, HIGH);
     delay(TESTING_DELAY);
+    makeNextMoveDecision();
   }
 }
 
@@ -58,6 +59,7 @@ void moveBack(int times = 1)
     analogWrite(rightMotor.pinSpeed, DEFAULT_SPEED);
     digitalWrite(rightMotor.pinDirection, LOW);
     delay(TESTING_DELAY);
+    makeNextMoveDecision();
   }
 }
 
@@ -69,6 +71,7 @@ void moveLeft(int times = 1)
     analogWrite(rightMotor.pinSpeed, DEFAULT_SPEED);
     digitalWrite(rightMotor.pinDirection, HIGH);
     delay(TESTING_DELAY);
+    makeNextMoveDecision();
   }
 }
 
@@ -80,6 +83,7 @@ void moveRight(int times = 1)
     analogWrite(rightMotor.pinSpeed, DEFAULT_SPEED);
     digitalWrite(rightMotor.pinDirection, LOW);
     delay(TESTING_DELAY);
+    makeNextMoveDecision();
   }
 }
 
@@ -89,6 +93,7 @@ void moveHalfLeft(int times = 1)
     analogWrite(rightMotor.pinSpeed, DEFAULT_SPEED);
     digitalWrite(rightMotor.pinDirection, HIGH);
     delay(TESTING_DELAY);
+    makeNextMoveDecision();
   }
 }
 
@@ -98,28 +103,8 @@ void moveHalfRight(int times = 1)
     analogWrite(leftMotor.pinSpeed, DEFAULT_SPEED);
     digitalWrite(leftMotor.pinDirection, HIGH);
     delay(TESTING_DELAY);
+    makeNextMoveDecision();
   }
-}
-
-void lookForward()
-{
-  moveStraight();
-  moveLeft();
-  moveStraight();
-  moveRight(2);
-  moveStraight();
-  moveLeft();
-}
-
-void lookBackward()
-{
-  moveRight(2);
-  moveStraight();
-  moveLeft();
-  moveStraight();
-  moveRight(2);
-  moveStraight();
-  moveLeft();
 }
 
 bool doesLeftDistSensorSee() {
@@ -157,19 +142,37 @@ int compareLasersInput()
   return BOTH_DIM; // if both laser sensors output 0
 }
 
-void loop()
-{
+void getSensorsInput() {
   leftLaserSensor.value = digitalRead(leftLaserSensor.pinName);
   rightLaserSensor.value = digitalRead(rightDistSensor.pinName);
   leftDistSensor.value = analogRead(leftDistSensor.pinName);
   rightDistSensor.value = analogRead(rightDistSensor.pinName);
+}
 
-  do {
-    lookForward();
-    lookBackward();
-  } while (!doesLeftDistSensorSee() && !doesRightDistSensorSee() && compareLasersInput() == BOTH_BRIGHT);
+void lookForward()
+{
+  moveStraight();
+  moveLeft();
+  moveStraight();
+  moveRight(2);
+  moveStraight();
+  moveLeft();
+}
 
- if (compareLasersInput() == FIRST_DIM) {
+void lookBackward()
+{
+  moveRight(2);
+  moveStraight();
+  moveLeft();
+  moveStraight();
+  moveRight(2);
+  moveStraight();
+  moveLeft();
+}
+
+void makeNextMoveDecision()
+{
+  if (compareLasersInput() == FIRST_DIM) {
     moveBack();
     moveRight();
     moveStraight();
@@ -191,4 +194,10 @@ void loop()
     if (leftDistSensor.value < rightDistSensor.value) moveLeft();
     else if (leftDistSensor.value > rightDistSensor.value) moveRight();
   }
+}
+
+void loop()
+{
+  lookForward();
+  lookBackward();
 }
