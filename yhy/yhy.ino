@@ -2,10 +2,10 @@ const int BIT_RATE = 9600;
 const int DEFAULT_SPEED = 50;
 const int OBSERVABLE_BOTTOM_BOUNDARY = 400;
 const int OBSERVABLE_TOP_BOUNDARY = 1000;
-const int TESTING_DELAY = 500; // in ms
+const int TESTING_DELAY = 1500; // in ms
 const int ROTATE_ANGLE_MULTIPLIER = 1; // change it!!
 
-enum LaserSensorCases {BOTH_DIM, BOTH_BRIGHT, LEFT_DIM, RIGHT_DIM};
+enum LaserSensorCases {BOTH_DIM, BOTH_BRIGHT, LEFT_BRIGHT, RIGHT_BRIGHT};
 enum MoveFunctions {NONE, STRAIGHT, BACK, LEFT, RIGHT, HALF_LEFT, HALF_RIGHT};
 MoveFunctions lastUsedMoveFunc = NONE;
 
@@ -129,8 +129,8 @@ bool doesRightDistSensorSee() {
 int getLaserSensorCase()
 {
   if (leftLaserSensor.value == 1 && rightLaserSensor.value == 1) return BOTH_BRIGHT;
-  if (leftLaserSensor.value == 1 && rightLaserSensor.value == 0) return RIGHT_DIM;
-  if (leftLaserSensor.value == 0 && rightLaserSensor.value == 1) return LEFT_DIM;
+  if (leftLaserSensor.value == 1 && rightLaserSensor.value == 0) return LEFT_BRIGHT;
+  if (leftLaserSensor.value == 0 && rightLaserSensor.value == 1) return RIGHT_BRIGHT;
   return BOTH_DIM; // if both laser sensors output 0
 }
 
@@ -147,33 +147,51 @@ void makeNextMoveDecision()
   getSensorsInput();
 
   switch (getLaserSensorCase()) {
-    case BOTH_DIM:
+    case BOTH_BRIGHT:
       moveBack();
       rotateBy(180); 
       break;
-    case LEFT_DIM: // move back and right
+    case LEFT_BRIGHT: // move back and right
       moveBack();
       moveHalfRight();
       break;
-    case RIGHT_DIM: // move back and left
+    case RIGHT_BRIGHT: // move back and left
       moveBack();
       moveHalfLeft();
      break;
   }
   
-  if (doesLeftDistSensorSee() && !doesRightDistSensorSee()) moveHalfLeft();
-  else if (doesLeftDistSensorSee() && !doesRightDistSensorSee()) moveHalfRight();
+  if (doesLeftDistSensorSee() && !doesRightDistSensorSee()) moveHalfRight();
+  else if (!doesLeftDistSensorSee() && doesRightDistSensorSee()) moveHalfLeft();
   
   while (doesLeftDistSensorSee() && doesRightDistSensorSee()) {
-    do moveStraight(200); while (abs(leftDistSensor.value - rightDistSensor.value) <= 5);
+    do moveStraight(200); while (abs(leftDistSensor.value - rightDistSensor.value) <= 10);
 
     if (leftDistSensor.value < rightDistSensor.value) moveLeft();
     else if (leftDistSensor.value > rightDistSensor.value) moveRight();
   }
 }
 
+void testDistSensor()
+{
+  Serial.println("Left dist sensor: ");
+  Serial.println(leftDistSensor.value);   
+  Serial.println("Right dist sensor: ");
+  Serial.println(rightDistSensor.value);
+}
+
+void testLaserSensor()
+{
+  Serial.println("Left laser sensor: ");
+  Serial.println(leftLaserSensor.value);        
+  Serial.println("Right laser sensor: ");
+  Serial.println(rightLaserSensor.value);
+}
+
 void loop()
 {
   moveStraight();
+  testLaserSensor();
+  testDistSensor();
   delay(TESTING_DELAY);
 }
