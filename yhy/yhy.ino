@@ -1,14 +1,13 @@
 const int BIT_RATE = 9600;
 const int DEFAULT_SPEED = 50;
 const int OBSERVABLE_BOTTOM_BOUNDARY = 400;
-const int OBSERVABLE_TOP_BOUNDARY = 900;
+const int OBSERVABLE_TOP_BOUNDARY = 1000;
 const int TESTING_DELAY = 500; // in ms
+const int ROTATE_ANGLE_MULTIPLIER = 1; // change it!!
 
 enum LaserSensorCases {BOTH_DIM, BOTH_BRIGHT, LEFT_DIM, RIGHT_DIM};
-enum LastUsedMoveFunc {NONE, STRAIGHT, BACK, LEFT, RIGHT, HALF_LEFT, HALF_RIGHT} lastUsedMoveFunc;
-lastUsedMoveFunc = NONE;
-
-int lastUsed;
+enum MoveFunctions {NONE, STRAIGHT, BACK, LEFT, RIGHT, HALF_LEFT, HALF_RIGHT};
+MoveFunctions lastUsedMoveFunc = NONE;
 
 struct {
   int pinName;
@@ -39,27 +38,8 @@ void setup()
   pinMode(rightMotor.pinSpeed, OUTPUT);
   pinMode(leftLaserSensor.pinName, INPUT);
   pinMode(rightLaserSensor.pinName, INPUT);
-}
 
-void lookForward()
-{
-  moveStraight();
-  moveLeft();
-  moveStraight();
-  moveRight(2);
-  moveStraight();
-  moveLeft();
-}
-
-void lookBackward()
-{
-  moveRight(2);
-  moveStraight();
-  moveLeft();
-  moveStraight();
-  moveRight(2);
-  moveStraight();
-  moveLeft();
+  rotateBy(180);
 }
 
 void stopMotors()
@@ -68,92 +48,82 @@ void stopMotors()
   analogWrite(rightMotor.pinSpeed, 0);
 }
 
-void moveStraight(int times = 1, int speed = 0)
+void moveStraight(int speed = DEFAULT_SPEED)
 {
-  if (!speed) speed = DEFAULT_SPEED;
   if (lastUsedMoveFunc != STRAIGHT) stopMotors();
-  for (int i = 0; i < times; i++) {
-    analogWrite(leftMotor.pinSpeed, speed);
-    digitalWrite(leftMotor.pinDirection, HIGH);
-    analogWrite(rightMotor.pinSpeed, speed);
-    digitalWrite(rightMotor.pinDirection, HIGH);
-    lastUsedMoveFunc = STRAIGHT;
-    makeNextMoveDecision();
-  }
+  analogWrite(leftMotor.pinSpeed, speed);
+  digitalWrite(leftMotor.pinDirection, HIGH);
+  analogWrite(rightMotor.pinSpeed, speed);
+  digitalWrite(rightMotor.pinDirection, HIGH);
+  lastUsedMoveFunc = STRAIGHT;
+  makeNextMoveDecision();
 }
 
-void moveBack(int times = 1, int speed = 0)
+void moveBack(int speed = DEFAULT_SPEED)
 {
-  if (!speed) speed = DEFAULT_SPEED;
   if (lastUsedMoveFunc != BACK) stopMotors();
-  for (int i = 0; i < times; i++) {
-    analogWrite(leftMotor.pinSpeed, speed);
-    digitalWrite(leftMotor.pinDirection, LOW);
-    analogWrite(rightMotor.pinSpeed, speed);
-    digitalWrite(rightMotor.pinDirection, LOW);
-    lastUsedMoveFunc = BACK;
-    makeNextMoveDecision();
-  }
+  analogWrite(leftMotor.pinSpeed, speed);
+  digitalWrite(leftMotor.pinDirection, LOW);
+  analogWrite(rightMotor.pinSpeed, speed);
+  digitalWrite(rightMotor.pinDirection, LOW);
+  lastUsedMoveFunc = BACK;
+  makeNextMoveDecision();
 }
 
-void moveLeft(int times = 1, int speed = 0)
+void moveLeft(int speed = DEFAULT_SPEED)
 {
-  if (!speed) speed = DEFAULT_SPEED;
   if (lastUsedMoveFunc != LEFT) stopMotors();
-  for (int i = 0; i < times; i++) {
-    analogWrite(leftMotor.pinSpeed, speed);
-    digitalWrite(leftMotor.pinDirection, LOW);
-    analogWrite(rightMotor.pinSpeed, speed);
-    digitalWrite(rightMotor.pinDirection, HIGH);
-    lastUsedMoveFunc = LEFT;
-    makeNextMoveDecision();
-  }
+  analogWrite(leftMotor.pinSpeed, speed);
+  digitalWrite(leftMotor.pinDirection, LOW);
+  analogWrite(rightMotor.pinSpeed, speed);
+  digitalWrite(rightMotor.pinDirection, HIGH);
+  lastUsedMoveFunc = LEFT;
+  makeNextMoveDecision();
 }
 
-void moveRight(int times = 1, int speed = 0)
+void moveRight(int speed = DEFAULT_SPEED)
 {
-  if (!speed) speed = DEFAULT_SPEED;
   if (lastUsedMoveFunc != RIGHT) stopMotors();
-  for (int i = 0; i < times; i++) {
-    analogWrite(leftMotor.pinSpeed, speed);
-    digitalWrite(leftMotor.pinDirection, HIGH);
-    analogWrite(rightMotor.pinSpeed, speed);
-    digitalWrite(rightMotor.pinDirection, LOW);
-    lastUsedMoveFunc = RIGHT;
-    makeNextMoveDecision();
-  }
+  analogWrite(leftMotor.pinSpeed, speed);
+  digitalWrite(leftMotor.pinDirection, HIGH);
+  analogWrite(rightMotor.pinSpeed, speed);
+  digitalWrite(rightMotor.pinDirection, LOW);
+  lastUsedMoveFunc = RIGHT;
+  makeNextMoveDecision();
 }
 
-void moveHalfLeft(int times = 1, int speed = 0)
+void moveHalfLeft(int speed = DEFAULT_SPEED)
 {
-  if (!speed) speed = DEFAULT_SPEED;
   if (lastUsedMoveFunc != HALF_LEFT) stopMotors();
-  for (int i = 0; i < times; i++) {
-    analogWrite(rightMotor.pinSpeed, speed);
-    digitalWrite(rightMotor.pinDirection, HIGH);
-    lastUsedMoveFunc = HALF_LEFT;
-    makeNextMoveDecision();
-  }
+  analogWrite(rightMotor.pinSpeed, speed);
+  digitalWrite(rightMotor.pinDirection, HIGH);
+  lastUsedMoveFunc = HALF_LEFT;
+  makeNextMoveDecision();
 }
 
-void moveHalfRight(int times = 1, int speed = 0)
+void moveHalfRight(int speed = DEFAULT_SPEED)
 {
-  if (!speed) speed = DEFAULT_SPEED;
   if (lastUsedMoveFunc != HALF_RIGHT) stopMotors();
-  for (int i = 0; i < times; i++) {
-    analogWrite(leftMotor.pinSpeed, speed);
-    digitalWrite(leftMotor.pinDirection, HIGH);
-    lastUsedMoveFunc = HALF_RIGHT;
-    makeNextMoveDecision();
-  }
+  analogWrite(leftMotor.pinSpeed, speed);
+  digitalWrite(leftMotor.pinDirection, HIGH);
+  lastUsedMoveFunc = HALF_RIGHT;
+  makeNextMoveDecision();
+}
+
+// clockwise (right wheel - still, left - moving)
+void rotateBy(int angle) 
+{
+  int speed = angle * ROTATE_ANGLE_MULTIPLIER;
+  analogWrite(leftMotor.pinSpeed, speed);
+  digitalWrite(leftMotor.pinDirection, HIGH);
 }
 
 bool doesLeftDistSensorSee() {
-  return leftDistSensor.value >= OBSERVABLE_BOTTOM_BOUNDARY && leftDistSensor.value < OBSERVABLE_TOP_BOUNDARY;
+  return leftDistSensor.value >= OBSERVABLE_BOTTOM_BOUNDARY && leftDistSensor.value <= OBSERVABLE_TOP_BOUNDARY;
 }
 
 bool doesRightDistSensorSee() {
-  return rightDistSensor.value >= OBSERVABLE_BOTTOM_BOUNDARY && rightDistSensor.value < OBSERVABLE_TOP_BOUNDARY;
+  return rightDistSensor.value >= OBSERVABLE_BOTTOM_BOUNDARY && rightDistSensor.value <= OBSERVABLE_TOP_BOUNDARY;
 }
 
 int getLaserSensorCase()
@@ -178,13 +148,16 @@ void makeNextMoveDecision()
 
   switch (getLaserSensorCase()) {
     case BOTH_DIM:
-      // move somewhere
+      moveBack();
+      rotateBy(180); 
       break;
-    case LEFT_DIM:
-      // move somewhere
+    case LEFT_DIM: // move back and right
+      moveBack();
+      moveHalfRight();
       break;
-    case RIGHT_DIM:
-      // move somewhere
+    case RIGHT_DIM: // move back and left
+      moveBack();
+      moveHalfLeft();
      break;
   }
   
@@ -192,7 +165,7 @@ void makeNextMoveDecision()
   else if (doesLeftDistSensorSee() && !doesRightDistSensorSee()) moveHalfRight();
   
   while (doesLeftDistSensorSee() && doesRightDistSensorSee()) {
-    do moveStraight(); while (abs(leftDistSensor.value - rightDistSensor.value) <= 5);
+    do moveStraight(200); while (abs(leftDistSensor.value - rightDistSensor.value) <= 5);
 
     if (leftDistSensor.value < rightDistSensor.value) moveLeft();
     else if (leftDistSensor.value > rightDistSensor.value) moveRight();
@@ -201,6 +174,6 @@ void makeNextMoveDecision()
 
 void loop()
 {
-  lookForward();
-  lookBackward();
+  moveStraight();
+  delay(TESTING_DELAY);
 }
