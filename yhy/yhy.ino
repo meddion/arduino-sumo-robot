@@ -5,7 +5,7 @@ const int OBSERVABLE_TOP_BOUNDARY = 1000;
 const int TESTING_DELAY = 500; // in ms
 const int ROTATE_ANGLE_MULTIPLIER = 1; // change it!!
 
-enum LaserSensorCases {BOTH_DIM, BOTH_BRIGHT, LEFT_DIM, RIGHT_DIM};
+enum LaserSensorCases {BOTH_DIM, BOTH_BRIGHT, LEFT_BRIGHT, RIGHT_BRIGHT};
 enum MoveFunctions {NONE, STRAIGHT, BACK, LEFT, RIGHT, HALF_LEFT, HALF_RIGHT};
 MoveFunctions lastUsedMoveFunc = NONE;
 
@@ -38,8 +38,8 @@ void setup()
   pinMode(rightMotor.pinSpeed, OUTPUT);
   pinMode(leftLaserSensor.pinName, INPUT);
   pinMode(rightLaserSensor.pinName, INPUT);
-
-  rotateBy(180);
+  pinMode(leftDistSensor.pinName, INPUT);
+  pinMode(rightDistSensor.pinName, INPUT);
 }
 
 void stopMotors()
@@ -56,7 +56,7 @@ void moveStraight(int speed = DEFAULT_SPEED)
   analogWrite(rightMotor.pinSpeed, speed);
   digitalWrite(rightMotor.pinDirection, HIGH);
   lastUsedMoveFunc = STRAIGHT;
-  makeNextMoveDecision();
+  reactOnMove();
 }
 
 void moveBack(int speed = DEFAULT_SPEED)
@@ -67,7 +67,7 @@ void moveBack(int speed = DEFAULT_SPEED)
   analogWrite(rightMotor.pinSpeed, speed);
   digitalWrite(rightMotor.pinDirection, LOW);
   lastUsedMoveFunc = BACK;
-  makeNextMoveDecision();
+  reactOnMove();
 }
 
 void moveLeft(int speed = DEFAULT_SPEED)
@@ -78,7 +78,7 @@ void moveLeft(int speed = DEFAULT_SPEED)
   analogWrite(rightMotor.pinSpeed, speed);
   digitalWrite(rightMotor.pinDirection, HIGH);
   lastUsedMoveFunc = LEFT;
-  makeNextMoveDecision();
+  reactOnMove();
 }
 
 void moveRight(int speed = DEFAULT_SPEED)
@@ -89,7 +89,7 @@ void moveRight(int speed = DEFAULT_SPEED)
   analogWrite(rightMotor.pinSpeed, speed);
   digitalWrite(rightMotor.pinDirection, LOW);
   lastUsedMoveFunc = RIGHT;
-  makeNextMoveDecision();
+  reactOnMove();
 }
 
 void moveHalfLeft(int speed = DEFAULT_SPEED)
@@ -97,8 +97,8 @@ void moveHalfLeft(int speed = DEFAULT_SPEED)
   if (lastUsedMoveFunc != HALF_LEFT) stopMotors();
   analogWrite(rightMotor.pinSpeed, speed);
   digitalWrite(rightMotor.pinDirection, HIGH);
-  lastUsedMoveFunc = HALF_LEFT;
-  makeNextMoveDecision();
+  lastUsedMoveFunc = HALF_LEFT;`````
+  reactOnMove();
 }
 
 void moveHalfRight(int speed = DEFAULT_SPEED)
@@ -107,15 +107,7 @@ void moveHalfRight(int speed = DEFAULT_SPEED)
   analogWrite(leftMotor.pinSpeed, speed);
   digitalWrite(leftMotor.pinDirection, HIGH);
   lastUsedMoveFunc = HALF_RIGHT;
-  makeNextMoveDecision();
-}
-
-// clockwise (right wheel - still, left - moving)
-void rotateBy(int angle) 
-{
-  int speed = angle * ROTATE_ANGLE_MULTIPLIER;
-  analogWrite(leftMotor.pinSpeed, speed);
-  digitalWrite(leftMotor.pinDirection, HIGH);
+  reactOnMove();
 }
 
 bool doesLeftDistSensorSee() {
@@ -129,8 +121,8 @@ bool doesRightDistSensorSee() {
 int getLaserSensorCase()
 {
   if (leftLaserSensor.value == 1 && rightLaserSensor.value == 1) return BOTH_BRIGHT;
-  if (leftLaserSensor.value == 1 && rightLaserSensor.value == 0) return RIGHT_DIM;
-  if (leftLaserSensor.value == 0 && rightLaserSensor.value == 1) return LEFT_DIM;
+  if (leftLaserSensor.value == 1 && rightLaserSensor.value == 0) return LEFT_BRIGHT;
+  if (leftLaserSensor.value == 0 && rightLaserSensor.value == 1) return RIGHT_BRIGHT;
   return BOTH_DIM; // if both laser sensors output 0
 }
 
@@ -142,38 +134,46 @@ void getSensorsInput()
   rightDistSensor.value = analogRead(rightDistSensor.pinName);
 }
 
-void makeNextMoveDecision()
+void dealWithOutborderCases() 
 {
-  getSensorsInput();
-
   switch (getLaserSensorCase()) {
-    case BOTH_DIM:
-      moveBack();
-      rotateBy(180); 
-      break;
-    case LEFT_DIM: // move back and right
+    case BOTH_BRIGHT:
       moveBack();
       moveHalfRight();
       break;
-    case RIGHT_DIM: // move back and left
+    case LEFT_BRIGHT: // move back and right
+      moveBack();
+      moveHalfRight();
+      break;
+    case RIGHT_BRIGHT: // move back and left
       moveBack();
       moveHalfLeft();
      break;
   }
-  
-  if (doesLeftDistSensorSee() && !doesRightDistSensorSee()) moveHalfLeft();
+}
+
+void dealWithSpottedEnemy()
+{
+  if (!doesLeftDistSensorSee() && doesRightDistSensorSee()) moveHalfLeft();
   else if (doesLeftDistSensorSee() && !doesRightDistSensorSee()) moveHalfRight();
   
   while (doesLeftDistSensorSee() && doesRightDistSensorSee()) {
-    do moveStraight(200); while (abs(leftDistSensor.value - rightDistSensor.value) <= 5);
+    do moveStraight(200); while (abs(leftDistSensor.value - rightDistSensor.value) <= 10);
 
     if (leftDistSensor.value < rightDistSensor.value) moveLeft();
     else if (leftDistSensor.value > rightDistSensor.value) moveRight();
   }
 }
 
+void reactOnMove()
+{
+  getSensorsInput();
+  dealWithOutborderCases();
+  dealWithSpottedEnemy();
+}
+
 void loop()
 {
-  moveStraight();
+  moveHalfLeft();
   delay(TESTING_DELAY);
 }
