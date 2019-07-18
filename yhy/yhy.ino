@@ -97,7 +97,7 @@ void moveHalfLeft(int speed = DEFAULT_SPEED)
   if (lastUsedMoveFunc != HALF_LEFT) stopMotors();
   analogWrite(rightMotor.pinSpeed, speed);
   digitalWrite(rightMotor.pinDirection, HIGH);
-  lastUsedMoveFunc = HALF_LEFT;`````
+  lastUsedMoveFunc = HALF_LEFT;
   reactOnMove();
 }
 
@@ -171,6 +171,7 @@ void reactOnMove()
   getSensorsInput();
   dealWithOutborderCases();
   dealWithSpottedEnemy();
+}
 
 void testDistSensor()
 {
