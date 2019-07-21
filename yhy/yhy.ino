@@ -2,8 +2,7 @@ const int BIT_RATE = 9600;
 const int DEFAULT_SPEED = 50;
 const int OBSERVABLE_BOTTOM_BOUNDARY = 400;
 const int OBSERVABLE_TOP_BOUNDARY = 1000;
-const int TESTING_DELAY = 1500; // in ms
-const int ROTATE_ANGLE_MULTIPLIER = 1; // change it!!
+const int TESTING_DELAY = 0; // in ms
 
 enum LaserSensorCases {BOTH_DIM, BOTH_BRIGHT, LEFT_BRIGHT, RIGHT_BRIGHT};
 enum MoveFunctions {NONE, STRAIGHT, BACK, LEFT, RIGHT, HALF_LEFT, HALF_RIGHT};
@@ -173,26 +172,8 @@ void reactOnMove()
   dealWithSpottedEnemy();
 }
 
-void testDistSensor()
-{
-  Serial.println("Left dist sensor: ");
-  Serial.println(leftDistSensor.value);   
-  Serial.println("Right dist sensor: ");
-  Serial.println(rightDistSensor.value);
-}
-
-void testLaserSensor()
-{
-  Serial.println("Left laser sensor: ");
-  Serial.println(leftLaserSensor.value);        
-  Serial.println("Right laser sensor: ");
-  Serial.println(rightLaserSensor.value);
-}
-
 void loop()
 {
   moveHalfLeft();
-  testLaserSensor();
-  testDistSensor();
   delay(TESTING_DELAY);
 }
