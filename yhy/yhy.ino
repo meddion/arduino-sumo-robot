@@ -5,7 +5,7 @@ const int OBSERVABLE_TOP_BOUNDARY = 1000;
 const int TESTING_DELAY = 0; // in ms
 
 enum LaserSensorCases {BOTH_DIM, BOTH_BRIGHT, LEFT_BRIGHT, RIGHT_BRIGHT};
-enum MoveFunctions {NONE, STRAIGHT, BACK, LEFT, RIGHT, HALF_LEFT, HALF_RIGHT};
+enum MoveFunctions {NONE, STRAIGHT, BACK, HALF_LEFT, HALF_RIGHT};
 MoveFunctions lastUsedMoveFunc = NONE;
 
 struct {
@@ -66,28 +66,6 @@ void moveBack(int speed = DEFAULT_SPEED)
   analogWrite(rightMotor.pinSpeed, speed);
   digitalWrite(rightMotor.pinDirection, LOW);
   lastUsedMoveFunc = BACK;
-  reactOnMove();
-}
-
-void moveLeft(int speed = DEFAULT_SPEED)
-{
-  if (lastUsedMoveFunc != LEFT) stopMotors();
-  analogWrite(leftMotor.pinSpeed, speed);
-  digitalWrite(leftMotor.pinDirection, LOW);
-  analogWrite(rightMotor.pinSpeed, speed);
-  digitalWrite(rightMotor.pinDirection, HIGH);
-  lastUsedMoveFunc = LEFT;
-  reactOnMove();
-}
-
-void moveRight(int speed = DEFAULT_SPEED)
-{
-  if (lastUsedMoveFunc != RIGHT) stopMotors();
-  analogWrite(leftMotor.pinSpeed, speed);
-  digitalWrite(leftMotor.pinDirection, HIGH);
-  analogWrite(rightMotor.pinSpeed, speed);
-  digitalWrite(rightMotor.pinDirection, LOW);
-  lastUsedMoveFunc = RIGHT;
   reactOnMove();
 }
 
