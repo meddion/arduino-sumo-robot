@@ -1,2 +1,2 @@
 # robotic-project
-This repository contains Arduino sketch for a sumo-robot that I and my team were contributing.
+This repository contains an Arduino sketch for a sumo robot that I with my team were making for the summer school program.
