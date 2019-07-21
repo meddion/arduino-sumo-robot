@@ -1,6 +1,6 @@
 const int BIT_RATE = 9600;
 const int DEFAULT_SPEED = 50;
-const int OBSERVABLE_BOTTOM_BOUNDARY = 400;
+const int OBSERVABLE_BOTTOM_BOUNDARY = 100;
 const int OBSERVABLE_TOP_BOUNDARY = 1000;
 const int TESTING_DELAY = 0; // in ms
 
